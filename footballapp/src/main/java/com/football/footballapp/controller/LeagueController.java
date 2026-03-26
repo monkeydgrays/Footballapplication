@@ -1,6 +1,5 @@
 package com.football.footballapp.controller;
 import com.football.footballapp.entity.League;
-import com.football.footballapp.service.FootballApiService;
 import com.football.footballapp.service.LeagueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,10 +14,8 @@ import java.util.List;
 public class LeagueController {
 
     private final LeagueService leagueService;
-    private final FootballApiService footballApiService;
-    public LeagueController(LeagueService leagueService, FootballApiService footballApiService) {
+    public LeagueController(LeagueService leagueService) {
         this.leagueService = leagueService;
-        this.footballApiService = footballApiService;
     }
 
     @GetMapping
@@ -31,15 +28,11 @@ public class LeagueController {
         return ResponseEntity.ok(leagueService.getLeagueById(id));
     }
 
-//    @PostMapping
-//    public ResponseEntity<League> createLeague(@RequestBody League league) {
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(leagueService.createLeague(league));
-//    }
-@PostMapping("/leagues")
-public ResponseEntity<String> syncLeagues() {
-    return ResponseEntity.ok(footballApiService.syncLeagues());
-}
+    @PostMapping
+    public ResponseEntity<League> createLeague(@RequestBody League league) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(leagueService.createLeague(league));
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLeague(@PathVariable Long id) {

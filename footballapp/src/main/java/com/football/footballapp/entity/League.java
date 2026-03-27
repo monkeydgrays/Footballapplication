@@ -17,6 +17,9 @@ public class League {
     @Column(nullable = false)
     private String country;
 
+    @Column(unique = true)
+    private Integer apiId;
+
     @Column
     private String season;
 

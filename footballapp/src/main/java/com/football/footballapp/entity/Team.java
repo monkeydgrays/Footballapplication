@@ -26,6 +26,9 @@ public class Team {
     @Column
     private String country;
 
+    @Column(unique = true)
+    private Integer apiId;
+
     @Column
     private Integer foundedYear;
 

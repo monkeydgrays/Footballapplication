@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/leagues")
@@ -27,9 +29,16 @@ public class LeagueController {
     }
 
     @GetMapping("/{id}")
-    public League getLeagueById(Long id) {
-        return leagueRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("League not found with id: " + id));
+    public ResponseEntity<?> getLeagueById(@PathVariable Long id) {
+        League league = leagueService.getLeagueById(id);
+        Map<String, Object> dto = new HashMap<>();
+        dto.put("id", league.getId());
+        dto.put("name", league.getName());
+        dto.put("logo", league.getLogo());
+        dto.put("country", league.getCountry());
+        dto.put("season", league.getSeason());
+        dto.put("apiId", league.getApiId());
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping

@@ -88,22 +88,16 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/sync/**").permitAll()          // ✅ move this UP
                         .requestMatchers(HttpMethod.GET, "/api/leagues/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/teams/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/players/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/fixtures/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/search/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/standings/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/search/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/sync/test").permitAll()
-                        .requestMatchers("/api/sync/**").permitAll()
-                        .requestMatchers("/api/sync/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/**")
-                        .hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/**")
-                        .hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/**")
-                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,

@@ -255,7 +255,6 @@ public class FootballApiService {
         League league = leagueRepository.findByApiId(leagueApiId)
                 .orElseThrow(() -> new RuntimeException("League not found"));
 
-        // Clear old standings for this league
         standingRepository.deleteByLeagueId(league.getId());
 
         for (Map teamData : standingsData.get(0)) {
@@ -279,8 +278,8 @@ public class FootballApiService {
             s.setGoalsFor(((Number) goalsData.get("for")).intValue());
             s.setGoalsAgainst(((Number) goalsData.get("against")).intValue());
             s.setGoalDifference(s.getGoalsFor() - s.getGoalsAgainst());
-            s.setForm((String) teamData.get("form")); // e.g. "WWDLW"
-
+            String rawForm = (String) teamData.get("form"); // "WWDLW"
+            s.setForm(rawForm);
             standingRepository.save(s);
         }
     }

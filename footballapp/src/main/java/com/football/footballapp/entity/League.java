@@ -37,4 +37,8 @@ public class League {
     @JsonIgnore  // ✅ ADD THIS
     private List<Fixture> fixtures;
 
+    @OneToMany(mappedBy = "league")
+    @JsonIgnore  // ✅ ADD THIS
+    private List<Standing> standings;
+
 }

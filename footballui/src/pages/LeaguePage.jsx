@@ -23,7 +23,7 @@ function LeaguePage() {
                 setStandings(standingsRes.data)
                 setFixtures(fixturesRes.data)
             } catch (err) {
-                console.error(err)
+                console.error('Failed request:', err.config?.url, err.message)
             } finally {
                 setLoading(false)
             }

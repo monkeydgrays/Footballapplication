@@ -27,7 +27,7 @@ public class FootballSyncController {
         return ResponseEntity.ok(footballApiService.testConnection());
     }
 
-    @PostMapping("/fixtures/{leagueId}/{apiLeagueId}/{season}")
+    @GetMapping("/fixtures/{leagueId}/{apiLeagueId}/{season}")
     public ResponseEntity<String> syncFixtures(
             @PathVariable Long leagueId,
             @PathVariable int apiLeagueId,
@@ -36,14 +36,6 @@ public class FootballSyncController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/standings/{leagueApiId}/{season}")
-    public ResponseEntity<String> syncStandings(
-            @PathVariable int leagueApiId,
-            @PathVariable int season) {
-
-        footballApiService.syncStandings(leagueApiId, season);
-        return ResponseEntity.ok("Standings synced successfully");
-    }
     @GetMapping("/standings/{leagueApiId}/{season}")
     public ResponseEntity<String> getStandings(
             @PathVariable int leagueApiId,

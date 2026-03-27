@@ -44,28 +44,28 @@ public class FootballDataController {
 //        return ResponseEntity.ok(leagueRepository.findById(leagueId)
 //                .orElseThrow(() -> new RuntimeException("League not found")));
 //    }
-    
+
     @GetMapping("/standings/league/{leagueId}")
     public ResponseEntity<?> getStandings(@PathVariable Long leagueId) {
-        List<StandingDTO> result = standingRepository
-                .findByLeagueIdOrderByPositionAsc(leagueId)
-                .stream().map(s -> {
-                    StandingDTO dto = new StandingDTO();
-                    dto.setTeamId(s.getTeam().getId());
-                    dto.setTeamName(s.getTeam().getName());
-                    dto.setTeamLogo(s.getTeam().getLogo());
-                    dto.setPosition(s.getPosition());
-                    dto.setPlayed(s.getPlayed());
-                    dto.setWon(s.getWon());
-                    dto.setDrawn(s.getDrawn());
-                    dto.setLost(s.getLost());
-                    dto.setGoalsFor(s.getGoalsFor());
-                    dto.setGoalsAgainst(s.getGoalsAgainst());
-                    dto.setGoalDifference(s.getGoalDifference());
-                    dto.setPoints(s.getPoints());
-                    dto.setForm(s.getForm());
-                    return dto;
-                }).toList();
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(
+                standingRepository.findByLeagueIdOrderByPositionAsc(leagueId)
+                        .stream().map(s -> {
+                            StandingDTO dto = new StandingDTO();
+                            dto.setTeamId(s.getTeam().getId());
+                            dto.setTeamName(s.getTeam().getName());
+                            dto.setTeamLogo(s.getTeam().getLogo());
+                            dto.setPosition(s.getPosition());
+                            dto.setPlayed(s.getPlayed());
+                            dto.setWon(s.getWon());
+                            dto.setDrawn(s.getDrawn());
+                            dto.setLost(s.getLost());
+                            dto.setGoalsFor(s.getGoalsFor());
+                            dto.setGoalsAgainst(s.getGoalsAgainst());
+                            dto.setGoalDifference(s.getGoalDifference());
+                            dto.setPoints(s.getPoints());
+                            dto.setForm(s.getForm());
+                            return dto;
+                        }).toList()
+        );
     }
 }

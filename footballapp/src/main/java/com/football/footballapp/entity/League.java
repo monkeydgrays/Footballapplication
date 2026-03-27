@@ -1,6 +1,9 @@
 package com.football.footballapp.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -25,5 +28,13 @@ public class League {
 
     @Column
     private String logo;
+
+    @OneToMany(mappedBy = "league")
+    @JsonIgnore  // ✅ ADD THIS
+    private List<Team> teams;
+
+    @OneToMany(mappedBy = "league")
+    @JsonIgnore  // ✅ ADD THIS
+    private List<Fixture> fixtures;
 
 }

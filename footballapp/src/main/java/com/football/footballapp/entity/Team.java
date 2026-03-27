@@ -1,4 +1,6 @@
 package com.football.footballapp.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -32,7 +34,10 @@ public class Team {
     @Column
     private Integer foundedYear;
 
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "league_id", nullable = false)
+    @JsonIgnoreProperties({"teams", "fixtures"})
     private League league;
+
 }

@@ -167,7 +167,7 @@ function LeaguePage() {
                                 </td>
                                 <td className="px-4 py-3 text-center hidden md:table-cell">
                                     <div className="flex gap-1 justify-center">
-                                        {s.form && s.form.split(',').map((result, i) => (
+                                        {s.form && s.form.split('').map((result, i) => (
                                             <span
                                                 key={i}
                                                 className={`w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold ${

@@ -5,6 +5,8 @@ import com.football.footballapp.entity.Team;
 import com.football.footballapp.enums.FixtureStatus;
 import com.football.footballapp.repository.FixtureRepository;
 import com.football.footballapp.repository.LeagueRepository;
+import com.football.footballapp.repository.StandingRepository;
+import com.football.footballapp.entity.Standing;
 import com.football.footballapp.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ public class FootballApiService {
     private final LeagueRepository leagueRepository;
     private final TeamRepository teamRepository;
     private final FixtureRepository fixtureRepository;
+    private final StandingRepository standingRepository;
 
     @Value("${football.api.key}")
     private String apiKey;
@@ -57,43 +60,6 @@ public class FootballApiService {
     }
     public Map debugTeams(int apiLeagueId, int season) {
         return callApi("/teams?league=" + apiLeagueId + "&season=" + season);
-    }
-
-    // Fetch and save standings for a league
-    public void syncStandings(int leagueApiId, int season) {
-        Map response = callApi("/standings?league=" + leagueApiId + "&season=" + season);
-        List<Map> responseList = (List<Map>) response.get("response");
-
-        if (responseList == null || responseList.isEmpty()) return;
-
-        Map leagueData = (Map) responseList.get(0);
-        Map leagueInfo = (Map) leagueData.get("league");
-        List<List<Map>> standingsData = (List<List<Map>>) leagueInfo.get("standings");
-
-        if (standingsData == null || standingsData.isEmpty()) return;
-
-        for (Map teamData : standingsData.get(0)) {
-            Map teamInfo = (Map) teamData.get("team");
-            String teamName = (String) teamInfo.get("name");
-            String teamLogo = (String) teamInfo.get("logo");
-            int apiTeamId = (int) teamInfo.get("id");
-
-            // Save team if not exists
-            if (teamRepository.findByApiId(apiTeamId).isEmpty()) {
-                Team team = new Team();
-                team.setName(teamName);
-                team.setLogo(teamLogo);
-                team.setCountry("England");
-                team.setApiId(apiTeamId);
-
-                League league = leagueRepository.findByApiId(leagueApiId)
-                        .orElseThrow(() -> new RuntimeException("League not found"));
-
-                team.setLeague(league);
-
-                teamRepository.save(team);
-            }
-        }
     }
 
     public String syncLeagues() {
@@ -275,6 +241,48 @@ public class FootballApiService {
         }
 
         return "Saved " + saved + " teams";
+    }
+    public void syncStandings(int leagueApiId, int season) {
+        Map response = callApi("/standings?league=" + leagueApiId + "&season=" + season);
+        List<Map> responseList = (List<Map>) response.get("response");
+        if (responseList == null || responseList.isEmpty()) return;
+
+        Map leagueData = (Map) responseList.get(0);
+        Map leagueInfo = (Map) leagueData.get("league");
+        List<List<Map>> standingsData = (List<List<Map>>) leagueInfo.get("standings");
+        if (standingsData == null || standingsData.isEmpty()) return;
+
+        League league = leagueRepository.findByApiId(leagueApiId)
+                .orElseThrow(() -> new RuntimeException("League not found"));
+
+        // Clear old standings for this league
+        standingRepository.deleteByLeagueId(league.getId());
+
+        for (Map teamData : standingsData.get(0)) {
+            Map teamInfo = (Map) teamData.get("team");
+            Map allData = (Map) teamData.get("all");
+            Map goalsData = (Map) allData.get("goals");
+
+            int apiTeamId = ((Number) teamInfo.get("id")).intValue();
+            Team team = teamRepository.findByApiId(apiTeamId).orElse(null);
+            if (team == null) continue;
+
+            Standing s = new Standing();
+            s.setLeague(league);
+            s.setTeam(team);
+            s.setPosition((int) teamData.get("rank"));
+            s.setPoints(((Number) teamData.get("points")).intValue());
+            s.setPlayed(((Number) allData.get("played")).intValue());
+            s.setWon(((Number) allData.get("win")).intValue());
+            s.setDrawn(((Number) allData.get("draw")).intValue());
+            s.setLost(((Number) allData.get("lose")).intValue());
+            s.setGoalsFor(((Number) goalsData.get("for")).intValue());
+            s.setGoalsAgainst(((Number) goalsData.get("against")).intValue());
+            s.setGoalDifference(s.getGoalsFor() - s.getGoalsAgainst());
+            s.setForm((String) teamData.get("form")); // e.g. "WWDLW"
+
+            standingRepository.save(s);
+        }
     }
 }
 

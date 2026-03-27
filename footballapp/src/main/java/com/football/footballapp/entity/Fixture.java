@@ -1,4 +1,5 @@
 package com.football.footballapp.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.football.footballapp.enums.FixtureStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,15 +14,15 @@ public class Fixture {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "home_team_id", nullable = false)
     private Team homeTeam;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "away_team_id", nullable = false)
     private Team awayTeam;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "league_id", nullable = false)
     private League league;
 

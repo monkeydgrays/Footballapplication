@@ -28,4 +28,7 @@ public interface FixtureRepository extends JpaRepository<Fixture, Long> {
             "(f.homeTeam.id = :team2Id AND f.awayTeam.id = :team1Id) " +
             "ORDER BY f.matchDate DESC")
     List<Fixture> findHeadToHead(Long team1Id, Long team2Id);
+
+
+    List<Fixture> findByHomeTeamIdOrAwayTeamId(Long homeTeamId, Long awayTeamId);
 }

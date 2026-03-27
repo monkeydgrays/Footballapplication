@@ -43,7 +43,7 @@ public class FixtureService {
 
         // Match details
         dto.setMatchDate(fixture.getMatchDate());
-        dto.setStatus(fixture.getStatus());
+        dto.setStatus(fixture.getStatus().name());
         dto.setHomeScore(fixture.getHomeScore());
         dto.setAwayScore(fixture.getAwayScore());
         dto.setVenue(fixture.getVenue());

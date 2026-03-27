@@ -1,5 +1,6 @@
 package com.football.footballapp.controller;
 import com.football.footballapp.entity.League;
+import com.football.footballapp.repository.LeagueRepository;
 import com.football.footballapp.service.LeagueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,10 @@ import java.util.List;
 public class LeagueController {
 
     private final LeagueService leagueService;
-    public LeagueController(LeagueService leagueService) {
+    private final LeagueRepository leagueRepository;
+    public LeagueController(LeagueService leagueService, LeagueRepository leagueRepository) {
         this.leagueService = leagueService;
+        this.leagueRepository = leagueRepository;
     }
 
     @GetMapping
@@ -24,8 +27,9 @@ public class LeagueController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<League> getLeagueById(@PathVariable Long id) {
-        return ResponseEntity.ok(leagueService.getLeagueById(id));
+    public League getLeagueById(Long id) {
+        return leagueRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("League not found with id: " + id));
     }
 
     @PostMapping

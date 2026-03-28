@@ -2,12 +2,10 @@ package com.football.footballapp.service;
 import com.football.footballapp.entity.Fixture;
 import com.football.footballapp.entity.League;
 import com.football.footballapp.entity.Team;
+import com.football.footballapp.entity.Player;
 import com.football.footballapp.enums.FixtureStatus;
-import com.football.footballapp.repository.FixtureRepository;
-import com.football.footballapp.repository.LeagueRepository;
-import com.football.footballapp.repository.StandingRepository;
+import com.football.footballapp.repository.*;
 import com.football.footballapp.entity.Standing;
-import com.football.footballapp.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -28,6 +26,7 @@ public class FootballApiService {
     private final TeamRepository teamRepository;
     private final FixtureRepository fixtureRepository;
     private final StandingRepository standingRepository;
+    private final PlayerRepository playerRepository;
 
     @Value("${football.api.key}")
     private String apiKey;
@@ -282,6 +281,75 @@ public class FootballApiService {
             s.setForm(rawForm);
             standingRepository.save(s);
         }
+    }
+    public String syncPlayers(Long teamId, int apiTeamId, int season) {
+        Map response = callApi("/players?team=" + apiTeamId + "&season=" + season);
+        List<Map> players = (List<Map>) response.get("response");
+
+        if (players == null || players.isEmpty()) return "No players found";
+
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+
+        int saved = 0;
+
+        for (Map playerData : players) {
+            try {
+                Map playerInfo = (Map) playerData.get("player");
+                List<Map> statistics = (List<Map>) playerData.get("statistics");
+                Map stats = statistics != null && !statistics.isEmpty()
+                        ? statistics.get(0) : null;
+                Map gamesStats = stats != null ? (Map) stats.get("games") : null;
+                Map goalsStats = stats != null ? (Map) stats.get("goals") : null;
+                Map cardsStats = stats != null ? (Map) stats.get("cards") : null;
+
+                String playerName = (String) playerInfo.get("name");
+
+                // Skip if already exists in this team
+                boolean exists = playerRepository.findByTeamId(teamId)
+                        .stream()
+                        .anyMatch(p -> p.getName().equals(playerName));
+                if (exists) continue;
+
+                Player player = new Player();
+                player.setName(playerName);
+                player.setPhoto((String) playerInfo.get("photo"));
+                player.setNationality((String) playerInfo.get("nationality"));
+                player.setAge(playerInfo.get("age") != null ?
+                        ((Number) playerInfo.get("age")).intValue() : null);
+
+                if (gamesStats != null) {
+                    if (gamesStats.get("position") != null)
+                        player.setPosition((String) gamesStats.get("position"));
+                    if (gamesStats.get("number") != null)
+                        player.setJerseyNumber(((Number) gamesStats.get("number")).intValue());
+                    if (gamesStats.get("appearences") != null)
+                        player.setAppearances(((Number) gamesStats.get("appearences")).intValue());
+                }
+
+                if (goalsStats != null) {
+                    if (goalsStats.get("total") != null)
+                        player.setGoals(((Number) goalsStats.get("total")).intValue());
+                    if (goalsStats.get("assists") != null)
+                        player.setAssists(((Number) goalsStats.get("assists")).intValue());
+                }
+
+                if (cardsStats != null) {
+                    if (cardsStats.get("yellow") != null)
+                        player.setYellowCards(((Number) cardsStats.get("yellow")).intValue());
+                    if (cardsStats.get("red") != null)
+                        player.setRedCards(((Number) cardsStats.get("red")).intValue());
+                }
+
+                player.setTeam(team);
+                playerRepository.save(player);
+                saved++;
+
+            } catch (Exception e) {
+                System.out.println("Skipped player: " + e.getMessage());
+            }
+        }
+        return "Saved " + saved + " players for team " + teamId;
     }
 }
 

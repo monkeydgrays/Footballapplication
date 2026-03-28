@@ -1,13 +1,11 @@
 package com.football.footballapp.controller;
 import com.football.footballapp.dto.FixtureDTO;
 import com.football.footballapp.dto.StandingDTO;
+import com.football.footballapp.dto.PlayerDTO;
 import com.football.footballapp.entity.Fixture;
 import com.football.footballapp.entity.Team;
 import com.football.footballapp.enums.FixtureStatus;
-import com.football.footballapp.repository.FixtureRepository;
-import com.football.footballapp.repository.LeagueRepository;
-import com.football.footballapp.repository.StandingRepository;
-import com.football.footballapp.repository.TeamRepository;
+import com.football.footballapp.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +23,7 @@ public class FootballDataController {
     private final TeamRepository teamRepository;
     private final FixtureRepository fixtureRepository;
     private final StandingRepository standingRepository;
+    private  final PlayerRepository playerRepository;
 
 
     @GetMapping("/leagues/{leagueId}/teams")
@@ -66,6 +65,31 @@ public class FootballDataController {
                             dto.setForm(s.getForm());
                             return dto;
                         }).toList()
+        );
+    }
+    @GetMapping("/teams/{teamId}/players")
+    public ResponseEntity<?> getPlayersByTeam(@PathVariable Long teamId) {
+        return ResponseEntity.ok(
+                playerRepository.findByTeamId(teamId).stream().map(p -> {
+                    PlayerDTO dto = new PlayerDTO();
+                    dto.setId(p.getId());
+                    dto.setName(p.getName());
+                    dto.setPhoto(p.getPhoto());
+                    dto.setNationality(p.getNationality());
+                    dto.setPosition(p.getPosition());
+                    dto.setAge(p.getAge());
+                    dto.setJerseyNumber(p.getJerseyNumber());
+                    dto.setGoals(p.getGoals());
+                    dto.setAssists(p.getAssists());
+                    dto.setYellowCards(p.getYellowCards());
+                    dto.setRedCards(p.getRedCards());
+                    dto.setAppearances(p.getAppearances());
+                    dto.setTeamId(p.getTeam().getId());
+                    dto.setTeamName(p.getTeam().getName());
+                    dto.setLeagueId(p.getTeam().getLeague().getId());
+                    dto.setLeagueName(p.getTeam().getLeague().getName());
+                    return dto;
+                }).toList()
         );
     }
 }

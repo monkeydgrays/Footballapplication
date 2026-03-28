@@ -2,6 +2,7 @@ package com.football.footballapp.controller;
 import com.football.footballapp.dto.FixtureDTO;
 import com.football.footballapp.dto.TeamDTO;
 import com.football.footballapp.entity.League;
+import com.football.footballapp.entity.Team;
 import com.football.footballapp.repository.FixtureRepository;
 import com.football.footballapp.repository.LeagueRepository;
 import com.football.footballapp.repository.TeamRepository;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -98,6 +100,15 @@ public class FootballSyncController {
                         }).toList()
         );
     }
+
+    @GetMapping("/players/{teamId}/{apiTeamId}/{season}")
+    public ResponseEntity<String> syncPlayers(
+            @PathVariable Long teamId,
+            @PathVariable int apiTeamId,
+            @PathVariable int season) {
+        return ResponseEntity.ok(footballApiService.syncPlayers(teamId, apiTeamId, season));
+    }
+
     @GetMapping("/leagues/{leagueId}/fixtures")
     public ResponseEntity<?> getFixturesByLeague(@PathVariable Long leagueId) {
         return ResponseEntity.ok(
@@ -118,5 +129,27 @@ public class FootballSyncController {
                             return dto;
                         }).toList()
         );
+    }
+    @GetMapping("/players/league/{leagueId}/{season}")
+    public ResponseEntity<String> syncAllPlayersInLeague(
+            @PathVariable Long leagueId,
+            @PathVariable int season) {
+
+        List<Team> teams = teamRepository.findByLeagueId(leagueId);
+        StringBuilder result = new StringBuilder();
+
+        for (Team team : teams) {
+            try {
+                String res = footballApiService.syncPlayers(
+                        team.getId(), team.getApiId(), season
+                );
+                result.append(team.getName()).append(": ").append(res).append("\n");
+                Thread.sleep(500); // small delay between requests
+            } catch (Exception e) {
+                result.append(team.getName()).append(": FAILED - ")
+                        .append(e.getMessage()).append("\n");
+            }
+        }
+        return ResponseEntity.ok(result.toString());
     }
 }

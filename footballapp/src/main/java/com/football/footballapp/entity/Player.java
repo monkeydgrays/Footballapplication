@@ -1,4 +1,5 @@
 package com.football.footballapp.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -46,6 +47,7 @@ public class Player {
     private Integer appearances;
 
     @ManyToOne
-    @JoinColumn(name = "team_id", nullable = false)
+    @JoinColumn(name = "team_id")
+    @JsonIgnore
     private Team team;
 }

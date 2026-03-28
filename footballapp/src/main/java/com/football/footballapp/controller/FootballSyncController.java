@@ -59,10 +59,11 @@ public class FootballSyncController {
         return ResponseEntity.ok(footballApiService.syncTeams(leagueId, apiLeagueId, season));
     }
 
-    @PostMapping("/leagues")
+    @GetMapping("/leagues")
     public ResponseEntity<String> syncLeagues() {
         return ResponseEntity.ok(footballApiService.syncLeagues());
     }
+
     @GetMapping("/teams/{leagueId}/{apiLeagueId}")
     public ResponseEntity<String> syncTeamsFromDb(
             @PathVariable Long leagueId,
